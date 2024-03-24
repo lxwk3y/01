@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="01" options="" />
+      <module name="01" options="--add-exports jdk.jfr/jdk.jfr.internal.consumer=ALL-UNNAMED" />
     </option>
   </component>
 </project>

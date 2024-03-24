@@ -54,7 +54,7 @@ public class FileTransferProtocol implements Runnable {
     }
 
     public void sendFile(Path filePath, Socket socket) {
-        try (InputStream fileInputStream = Files.newInputStream(filePath) ; OutputStream socketOutputStream = socket.getOutputStream()) {
+        try (InputStream fileInputStream = Files.newInputStream(filePath); OutputStream socketOutputStream = socket.getOutputStream()) {
 
             long fileSize = Files.size(filePath);
             long totalBytesSent = 0;
@@ -79,10 +79,20 @@ public class FileTransferProtocol implements Runnable {
     }
 
     public void receiveFile(Socket socket) {
-        Path outputPath = Paths.get("ReceivedFiles/" + filePath.getFileName());
-        System.out.println(outputPath);
+        Path savePath = Paths.get("ReceivedFiles/");
 
-        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath) ; InputStream socketInputStream = socket.getInputStream()) {
+        try {
+            if (!Files.exists(savePath)) {
+                Files.createDirectories(savePath);
+            }
+        } catch (IOException r) {
+            r.printStackTrace();
+            return;
+        }
+
+        Path outputPath = savePath.resolve(filePath.getFileName());
+
+        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath); InputStream socketInputStream = socket.getInputStream()) {
 
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
@@ -105,6 +115,7 @@ public class FileTransferProtocol implements Runnable {
             e.printStackTrace();
         }
     }
+
 
     public String calculateChecksum(String filePath) {
         Path path = Paths.get(filePath);

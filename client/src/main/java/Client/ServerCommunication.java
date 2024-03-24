@@ -120,7 +120,7 @@ public class ServerCommunication {
                             }
                             break;
                         case "SENDFILE_RESP":
-                            System.out.println(jsonNode.get("You have been sent the following file: " + jsonNode.get("filename").asText() + " (" + jsonNode.get("filesize").asLong() + " bytes)"));
+                            System.out.println("You have been sent the following file: " + jsonNode.get("filename").asText() + " (" + jsonNode.get("filesize").asLong() + " bytes)");
                             System.out.println("Do you want to accept this file? (FILETRANSFER_ACCEPT/FILETRANSFER_DENY <filename>)");
 
                             Path filePath = Paths.get(jsonNode.get("filePath").asText());
