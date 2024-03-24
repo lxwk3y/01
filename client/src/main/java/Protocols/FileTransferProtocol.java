@@ -19,6 +19,7 @@ public class FileTransferProtocol implements Runnable {
     private Path filePath;
     private String checksum;
     private long fileSize;
+    private Path savePath;
 
     public void setFilePath(Path filePath) {
         this.filePath = filePath;
@@ -79,16 +80,8 @@ public class FileTransferProtocol implements Runnable {
     }
 
     public void receiveFile(Socket socket) {
-        Path savePath = Paths.get("ReceivedFiles/");
 
-        try {
-            if (!Files.exists(savePath)) {
-                Files.createDirectories(savePath);
-            }
-        } catch (IOException r) {
-            r.printStackTrace();
-            return;
-        }
+        setSavePath();
 
         Path outputPath = savePath.resolve(filePath.getFileName());
 
@@ -137,6 +130,18 @@ public class FileTransferProtocol implements Runnable {
             }
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void setSavePath() {
+        savePath = Paths.get("ReceivedFiles/");
+
+        try {
+            if (!Files.exists(savePath)) {
+                Files.createDirectories(savePath);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
