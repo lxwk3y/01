@@ -120,7 +120,7 @@ public class ServerCommunication {
                             }
                             break;
                         case "SENDFILE_RESP":
-                            System.out.println(jsonNode.get("You have been sent the following file: " + jsonNode.get("filename").asText() + " (" + jsonNode.get("filesize").asLong() + " bytes)");
+                            System.out.println(jsonNode.get("You have been sent the following file: " + jsonNode.get("filename").asText() + " (" + jsonNode.get("filesize").asLong() + " bytes)"));
                             System.out.println("Do you want to accept this file? (FILETRANSFER_ACCEPT/FILETRANSFER_DENY <filename>)");
 
                             Path filePath = Paths.get(jsonNode.get("filePath").asText());
@@ -247,7 +247,6 @@ public class ServerCommunication {
                     case "SENDFILE":
                         Path path = Paths.get(parts[2]);
                         String filename = path.getFileName().toString();
-                        fileTransferMap.put(filename, path);
                         initializeManager.getCommunicationManager().sendToServer("SENDFILE_REQ", objectMapper.createObjectNode()
                                 .put("receiver", parts[1])
                                 .put("filename", filename)
@@ -258,7 +257,6 @@ public class ServerCommunication {
                         break;
                     case "FILETRANSFER_ACCEPT":
                         Path acceptedPath = fileTransferMap.get(parts[1]);
-                        System.out.println("size: " + fileTransferMap.size());
 
                         if (acceptedPath != null) {
                             initializeManager.getCommunicationManager().sendToServer("FILETRANSFER_ACCEPT", objectMapper.createObjectNode()

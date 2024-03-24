@@ -1,5 +1,7 @@
 package main.java.Protocols;
 
+import org.apache.logging.log4j.LogManager;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -8,14 +10,14 @@ import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileTransferProtocol implements Runnable {
 
     private final int BUFFER_SIZE = 65536;
     private final String serverAddress = "127.0.0.1";
     private final int serverPort = 1338;
-    //Change to enum to make the role more readable. a "String" could represent *any* text,
-    // whereas an enum makes the options clear to future developers
     private TransferRole role = null;
     private Path filePath;
     private String checksum;
@@ -39,9 +41,7 @@ public class FileTransferProtocol implements Runnable {
 
     @Override
     public void run() {
-        //start thread at top-level since it's needed in any case
         new Thread(() -> {
-            //change to try-with-resources to make sure the socket is always closed when it's no longer in use
             try (Socket socket = new Socket(serverAddress, serverPort)) {
                 socket.setReceiveBufferSize(BUFFER_SIZE);
                 socket.setSendBufferSize(BUFFER_SIZE);
@@ -85,8 +85,8 @@ public class FileTransferProtocol implements Runnable {
         Path outputPath = Paths.get("xddee.txt");
         System.out.println(outputPath);
 
-        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath)) {
-            InputStream socketInputStream = socket.getInputStream();
+        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath) ; InputStream socketInputStream = socket.getInputStream()) {
+
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
             long totalBytesReceived = 0;
