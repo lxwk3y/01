@@ -1,6 +1,5 @@
 package main.java.Protocols;
 
-import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,8 +9,6 @@ import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FileTransferProtocol implements Runnable {
 
@@ -82,7 +79,7 @@ public class FileTransferProtocol implements Runnable {
     }
 
     public void receiveFile(Socket socket) {
-        Path outputPath = Paths.get("xddee.txt");
+        Path outputPath = Paths.get("ReceivedFiles/" + filePath.getFileName());
         System.out.println(outputPath);
 
         try (OutputStream fileOutputStream = Files.newOutputStream(outputPath) ; InputStream socketInputStream = socket.getInputStream()) {
