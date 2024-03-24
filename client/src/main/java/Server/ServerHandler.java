@@ -1,5 +1,6 @@
 package main.java.Server;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import main.java.Helpers.CleanupCallback;
 import main.java.Managers.CommunicationManager;
 import main.java.Managers.ConnectionManager;
@@ -100,7 +101,14 @@ public class ServerHandler implements Runnable, CleanupCallback {
                     initializeManager.getProtocolManager().getGameProtocol().gameWinners(jsonNode);
                     break;
                 case "SENDFILE_REQ":
-                    initializeManager.getCommunicationManager().sendMessage("SENDFILE_REQ", jsonNode);
+                    String receiver = jsonNode.get("receiver").asText();
+                    ServerHandler receiverHandler = ConnectionManager.getUsers().get(receiver);
+
+                    if (receiverHandler != null) {
+                        receiverHandler.getCommunicationManager().sendMessage("SENDFILE_RESP", jsonNode);
+                    } else {
+                        System.err.println("Receiver not found or not connected");
+                    }
                     break;
                 case "FILETRANSFER_ACCEPT":
                     initializeManager.getCommunicationManager().sendMessage("FILETRANSFER_ACCEPT", jsonNode);

@@ -2,6 +2,9 @@ package main.java.Protocols;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,11 +17,11 @@ public class FileTransferProtocol implements Runnable {
     //Change to enum to make the role more readable. a "String" could represent *any* text,
     // whereas an enum makes the options clear to future developers
     private TransferRole role = null;
-    private String filePath;
+    private Path filePath;
     private String checksum;
     private long fileSize;
 
-    public void setFilePath(String filePath) {
+    public void setFilePath(Path filePath) {
         this.filePath = filePath;
     }
 
@@ -53,14 +56,14 @@ public class FileTransferProtocol implements Runnable {
         }).start();
     }
 
-    public void sendFile(String filePath, Socket socket) {
-        try (FileInputStream fileInputStream = new FileInputStream(filePath); OutputStream socketOutputStream = socket.getOutputStream()) {
-            File file = new File(filePath);
-            long fileSize = file.length();
-            long totalBytesSent = 0;
+    public void sendFile(Path filePath, Socket socket) {
+        try (InputStream fileInputStream = Files.newInputStream(filePath) ; OutputStream socketOutputStream = socket.getOutputStream()) {
 
+            long fileSize = Files.size(filePath);
+            long totalBytesSent = 0;
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
+
             while ((len = fileInputStream.read(buffer)) != -1) {
                 socketOutputStream.write(buffer, 0, len);
                 totalBytesSent += len;
@@ -79,10 +82,10 @@ public class FileTransferProtocol implements Runnable {
     }
 
     public void receiveFile(Socket socket) {
-        //change to try-with-resources to avoid needing a try-catch inside a try-catch
-        try (FileOutputStream fileOutputStream = new FileOutputStream("xddee.txt")) {
-            System.out.println("FileOutputStream created."); // Debug log
+        Path outputPath = Paths.get("xddee.txt");
+        System.out.println(outputPath);
 
+        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath)) {
             InputStream socketInputStream = socket.getInputStream();
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
@@ -100,16 +103,19 @@ public class FileTransferProtocol implements Runnable {
 
             System.out.println("File transfer completed."); // Debug log
 
-            System.out.println(checkChecksum(calculateChecksum(filePath)) ? "Success" : "Failure");
+            System.out.println(checkChecksum(calculateChecksum(outputPath.toString())) ? "Success" : "Failure");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public String calculateChecksum(String filePath) {
+        Path path = Paths.get(filePath);
+
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            try (InputStream fis = new FileInputStream(filePath); DigestInputStream dis = new DigestInputStream(fis, md)) {
+            try (InputStream fis = Files.newInputStream(path);
+                 DigestInputStream dis = new DigestInputStream(fis, md)) {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 while (dis.read(buffer) != -1) ;
                 byte[] digest = md.digest();

@@ -3,6 +3,8 @@ package main.java.Client;
 import main.java.Managers.*;
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.util.HashMap;
 
 public class ClientHandler {
     private InitializeManager initializeManager = new InitializeManager();

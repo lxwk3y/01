@@ -1,5 +1,6 @@
 package main.java.Managers;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -27,4 +28,7 @@ public class SessionManager {
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }
+
+
+
 }
