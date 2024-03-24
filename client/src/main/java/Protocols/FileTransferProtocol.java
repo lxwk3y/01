@@ -13,8 +13,6 @@ import java.security.NoSuchAlgorithmException;
 public class FileTransferProtocol implements Runnable {
 
     private final int BUFFER_SIZE = 65536;
-    private final String serverAddress = "127.0.0.1";
-    private final int serverPort = 1338;
     private TransferRole role = null;
     private Path filePath;
     private String checksum;
@@ -36,26 +34,29 @@ public class FileTransferProtocol implements Runnable {
     public void setRole(TransferRole role) {
         this.role = role;
     }
+    private Path outputPath;
+
+    private final Path downloadedFile = Paths.get("downloadedFile.txt");
+
 
     @Override
     public void run() {
         new Thread(() -> {
-            try (Socket socket = new Socket(serverAddress, serverPort)) {
-                socket.setReceiveBufferSize(BUFFER_SIZE);
-                socket.setSendBufferSize(BUFFER_SIZE);
-                if (role == TransferRole.SENDER) {
-                    sendFile(filePath, socket);
-                } else if (role == TransferRole.RECEIVER) {
-                    receiveFile(socket);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            setSavePath();
+            if (role == TransferRole.SENDER) {
+                sendFile(filePath);
+            } else if (role == TransferRole.RECEIVER) {
+                receiveFile();
             }
         }).start();
     }
 
-    public void sendFile(Path filePath, Socket socket) {
-        try (InputStream fileInputStream = Files.newInputStream(filePath); OutputStream socketOutputStream = socket.getOutputStream()) {
+    public void sendFile(Path filePath) {
+        outputPath = savePath.resolve(filePath.getFileName());
+        try (InputStream fileInputStream = Files.newInputStream(filePath); OutputStream fileOutputStream = Files.newOutputStream(downloadedFile)) {
+
+            String fileChecksum = calculateChecksum(filePath.toString());
+            setChecksum(fileChecksum);
 
             long fileSize = Files.size(filePath);
             long totalBytesSent = 0;
@@ -63,15 +64,10 @@ public class FileTransferProtocol implements Runnable {
             int len;
 
             while ((len = fileInputStream.read(buffer)) != -1) {
-                socketOutputStream.write(buffer, 0, len);
+                fileOutputStream.write(buffer, 0, len);
                 totalBytesSent += len;
-                long progress = (totalBytesSent * 100L) / fileSize;
-                System.out.println("Progress: " + progress + "%");
-                System.out.println("Total bytes sent: " + totalBytesSent);
-                System.out.println("Bytes sent in this iteration: " + len); // Add this debug log
             }
-
-            socketOutputStream.flush();
+            fileOutputStream.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,24 +75,18 @@ public class FileTransferProtocol implements Runnable {
 
     }
 
-    public void receiveFile(Socket socket) {
+    public void receiveFile() {
 
-        setSavePath();
-
-        Path outputPath = savePath.resolve(filePath.getFileName());
-
-        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath); InputStream socketInputStream = socket.getInputStream()) {
+        try (OutputStream fileOutputStream = Files.newOutputStream(outputPath); InputStream fileInputStream = Files.newInputStream(downloadedFile)) {
 
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
             long totalBytesReceived = 0;
 
-            while ((len = socketInputStream.read(buffer)) != -1) {
-                System.out.println("while loop");
+            while ((len = fileInputStream.read(buffer)) != -1) {
                 fileOutputStream.write(buffer, 0, len);
                 totalBytesReceived += len;
                 long progress = (totalBytesReceived * 100L) / fileSize;
-                System.out.println("Progress: " + progress + "%");
 
                 System.out.println("Bytes received: " + len); // Debug log
             }

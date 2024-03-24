@@ -14,7 +14,6 @@ public class ChatServer {
     private static final int FILE_TRANSFER_PORT = 1338;
     private final Set<ServerHandler> chatClients = ConcurrentHashMap.newKeySet();
     private final Set<ClientHandler> fileTransferClients = ConcurrentHashMap.newKeySet();
-    private Socket socket;
 
     public static void main(String[] args) {
         ChatServer server = new ChatServer();
@@ -24,7 +23,7 @@ public class ChatServer {
 
     public void startChatServer() {
         try (ServerSocket serverSocket = new ServerSocket(CHAT_PORT)) {
-            System.out.println("Chat main.java.Server started on port " + CHAT_PORT);
+            System.out.println("Chat Server started on port " + CHAT_PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 ServerHandler client = new ServerHandler(clientSocket, this);
@@ -32,19 +31,19 @@ public class ChatServer {
                 new Thread(client).start();
             }
         } catch (IOException e) {
-            System.err.println("Chat main.java.Server exception: " + e.getMessage());
+            System.err.println("Chat Server exception: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void startFileTransferServer() {
         try (ServerSocket serverSocket = new ServerSocket(FILE_TRANSFER_PORT)) {
-            System.out.println("File Transfer main.java.Server started on port " + FILE_TRANSFER_PORT);
+            System.out.println("File Transfer Server started on port " + FILE_TRANSFER_PORT);
             while (true) {
-                Socket soc = serverSocket.accept(); //???
+                Socket soc = serverSocket.accept();
             }
         } catch (IOException e) {
-            System.err.println("File Transfer main.java.Server exception: " + e.getMessage());
+            System.err.println("File Transfer Server exception: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -136,6 +136,10 @@ public class ServerCommunication {
                             initializeManager.getProtocolManager().getFileTransferProtocol().setRole(FileTransferProtocol.TransferRole.RECEIVER);
                             initializeManager.getProtocolManager().getFileTransferProtocol().run();
                             break;
+                        case "FILETRANSFER_DENY":
+                            System.out.println("Rejected file transfer");
+                            fileTransferMap.remove(jsonNode.get("filename").asText());
+                            break;
                         default:
                             System.err.println("Invalid header received: " + header);
                             break;
@@ -267,6 +271,11 @@ public class ServerCommunication {
                         } else {
                             System.out.println("File with name '" + parts[1] + "' not found.");
                         }
+                        break;
+                    case "FILETRANSFER_DENY":
+                        initializeManager.getCommunicationManager().sendToServer("FILETRANSFER_DENY", objectMapper.createObjectNode()
+                                .put("filename", parts[1])
+                        );
                         break;
                     default:
                         System.out.println("Invalid command");

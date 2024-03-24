@@ -113,6 +113,9 @@ public class ServerHandler implements Runnable, CleanupCallback {
                 case "FILETRANSFER_ACCEPT":
                     initializeManager.getCommunicationManager().sendMessage("FILETRANSFER_ACCEPT", jsonNode);
                     break;
+                case "FILETRANSFER_DENY":
+                    initializeManager.getCommunicationManager().sendMessage("FILETRANSFER_DENY", jsonNode);
+                    break;
                 default:
                     initializeManager.getCommunicationManager().sendMessage("UNKNOWN_COMMAND", "ERROR", 404);
                     break;
